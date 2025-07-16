@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-PostgreSQL Schema Migration Tool
+MigraCraft - Craft perfect PostgreSQL migrations with precision and artistry
 
-Generate PostgreSQL migrations from YAML schema definitions.
+Generate PostgreSQL migrations from YAML schema definitions and create entity classes
+for multiple programming languages.
 """
 
 import argparse
@@ -12,11 +13,19 @@ from pathlib import Path
 # Add the current directory to the path to import our module
 sys.path.insert(0, str(Path(__file__).parent))
 
-from migration_tool import SchemaMigrationTool
+from migracraft import SchemaMigrationTool
+from version import print_banner, get_version
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate PostgreSQL migrations from YAML schemas")
+    parser = argparse.ArgumentParser(
+        description="MigraCraft - Craft perfect PostgreSQL migrations from YAML schemas",
+        prog="migracraft"
+    )
+    parser.add_argument('--version', action='version', 
+                       version=f'MigraCraft {get_version()}')
+    parser.add_argument('--banner', action='store_true', 
+                       help='Display MigraCraft banner')
     parser.add_argument('--schemas-dir', default='schemas', help='Directory containing YAML schema files')
     parser.add_argument('--migrations-dir', default='migrations', help='Directory to store migration files')
     parser.add_argument('--name', help='Optional name for the migration')
@@ -29,6 +38,10 @@ def main():
     parser.add_argument('--entities-dir', default='entities', help='Directory to store generated entity files')
     
     args = parser.parse_args()
+    
+    if args.banner:
+        print_banner()
+        return
     
     tool = SchemaMigrationTool(args.schemas_dir, args.migrations_dir)
     

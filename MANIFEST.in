@@ -1,0 +1,14 @@
+include README.md
+include LICENSE
+include requirements.txt
+include MANIFEST.in
+include TESTS.md
+recursive-include migration_tool *.py
+recursive-include tests *.py
+recursive-include schemas *.yaml
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.orig
+recursive-exclude * *.rej
+recursive-exclude * .git*
+recursive-exclude * .DS_Store

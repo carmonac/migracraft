@@ -1,28 +1,37 @@
-# PostgreSQL Schema Migration Tool
+# MigraCraft 🛠️
 
-A powerful and flexible PostgreSQL schema migration tool that generates SQL migrations from YAML schema definitions.
+**Craft perfect PostgreSQL migrations with precision and artistry.**
 
-## Features
+A powerful and flexible PostgreSQL schema migration tool that generates SQL migrations from YAML schema definitions and creates entity classes for multiple programming languages.
 
-- **YAML Schema Definitions**: Define your database schema in easy-to-read YAML files
-- **Differential Migrations**: Automatically detect changes and generate incremental migrations
-- **Full Schema Migrations**: Generate complete schema migrations for initial setup
-- **Rollback Support**: Create rollback migrations to undo changes
-- **Schema Validation**: Comprehensive validation of YAML schema definitions
-- **Foreign Key Support**: Full support for foreign key constraints and relationships
-- **Index Management**: Create and manage database indexes
-- **PostgreSQL Functions**: Support for stored procedures and functions
-- **Entity Class Generation**: Generate entity classes in multiple programming languages
-- **Modular Architecture**: Clean, maintainable codebase split into logical modules
+## ✨ Features
 
-## Installation
+- **🎨 YAML Schema Definitions**: Define your database schema in elegant, readable YAML files
+- **⚡ Differential Migrations**: Automatically detect changes and generate incremental migrations
+- **🚀 Full Schema Migrations**: Generate complete schema migrations for initial setup
+- **↩️ Rollback Support**: Create rollback migrations to undo changes safely
+- **✅ Schema Validation**: Comprehensive validation of YAML schema definitions
+- **🔗 Foreign Key Support**: Full support for foreign key constraints and relationships
+- **📊 Index Management**: Create and manage database indexes efficiently
+- **⚙️ PostgreSQL Functions**: Support for stored procedures and functions
+- **🏗️ Entity Class Generation**: Generate entity classes in 7+ programming languages
+- **🧩 Modular Architecture**: Clean, maintainable codebase split into logical modules
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
-# Install dependencies
-pip install PyYAML
+# Install MigraCraft
+pip install migracraft
 
-# Clone or download the project
-cd migration_tool
+# Or install from source
+git clone https://github.com/yourusername/migracraft.git
+cd migracraft
+pip install -e .
+
+# Or using requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Quick Start
@@ -82,19 +91,26 @@ python3 migrate.py --rollback --name "undo_profiles"
 ## Project Structure
 
 ```
-migration_tool/
+migracraft-project/
 ├── migrate.py                 # Main entry point
-├── migration_tool/            # Core package
+├── migracraft/                # Core package
 │   ├── __init__.py           # Package initialization
 │   ├── config.py             # Configuration constants
 │   ├── exceptions.py         # Custom exceptions
 │   ├── validator.py          # Schema validation
 │   ├── sql_generator.py      # SQL generation
+│   ├── entity_generator.py   # Multi-language entity generation
 │   ├── migration_manager.py  # Migration management
+│   ├── migracraft.py         # Package entry point
 │   └── main.py              # Main tool class
 ├── schemas/                   # YAML schema definitions
 ├── migrations/               # Generated SQL migrations
+├── entities/                 # Generated entity classes
 ├── tests/                    # Test files
+├── setup.py                  # Package configuration
+├── requirements.txt          # Dependencies
+├── version.py               # Version management
+├── dev.py                   # Development helper
 └── README.md
 ```
 
