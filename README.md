@@ -34,6 +34,23 @@ pip install -e .
 pip install -r requirements.txt
 ```
 
+### Quick Commands
+
+```bash
+# Check version and see beautiful banner
+migracraft --version
+migracraft --banner
+
+# Validate schemas
+migracraft --validate
+
+# Create first migration
+migracraft --full --name "initial_setup"
+
+# Generate TypeScript entities
+migracraft --generate-entities typescript
+```
+
 ## Quick Start
 
 1. **Create schema files** in the `schemas/` directory:
@@ -67,32 +84,32 @@ tables:
 2. **Validate your schemas**:
 
 ```bash
-python3 migrate.py --validate
+migracraft --validate
 ```
 
 3. **Generate your first migration**:
 
 ```bash
-python3 migrate.py --name "initial_setup" --full
+migracraft --name "initial_setup" --full
 ```
 
 4. **Make changes to schemas and generate differential migrations**:
 
 ```bash
-python3 migrate.py --name "add_user_profiles"
+migracraft --name "add_user_profiles"
 ```
 
 5. **Create rollback migrations when needed**:
 
 ```bash
-python3 migrate.py --rollback --name "undo_profiles"
+migracraft --rollback --name "undo_profiles"
 ```
 
 ## Project Structure
 
 ```
 migracraft-project/
-├── migrate.py                 # Main entry point
+├── migrate.py                 # CLI entry point (also available as 'migracraft' command)
 ├── migracraft/                # Core package
 │   ├── __init__.py           # Package initialization
 │   ├── config.py             # Configuration constants
@@ -119,18 +136,20 @@ migracraft-project/
 ### Command Line Options
 
 ```bash
-python3 migrate.py [OPTIONS]
+migracraft [OPTIONS]
 
 Options:
-  --schemas-dir DIR     Directory containing YAML schema files (default: schemas)
-  --migrations-dir DIR  Directory to store migration files (default: migrations)
-  --name NAME          Optional name for the migration
-  --full              Generate full migration instead of differential
-  --validate          Only validate schemas without creating migrations
-  --rollback          Create a rollback migration to undo the last migration
+  --version                 Show version information
+  --banner                  Display MigraCraft banner
+  --schemas-dir DIR         Directory containing YAML schema files (default: schemas)
+  --migrations-dir DIR      Directory to store migration files (default: migrations)
+  --name NAME              Optional name for the migration
+  --full                   Generate full migration instead of differential
+  --validate               Only validate schemas without creating migrations
+  --rollback               Create a rollback migration to undo the last migration
   --generate-entities LANG Generate entity classes for specified language
-  --entities-dir DIR      Directory to store generated entity files
-  -h, --help          Show help message
+  --entities-dir DIR       Directory to store generated entity files
+  -h, --help               Show help message
 ```
 
 ### Schema Definition Format
@@ -202,28 +221,28 @@ Generate entity classes from your schema definitions:
 
 ```bash
 # Generate TypeScript interfaces and classes
-python3 migrate.py --generate-entities typescript
+migracraft --generate-entities typescript
 
 # Generate Python dataclasses
-python3 migrate.py --generate-entities python
+migracraft --generate-entities python
 
 # Generate Dart classes with JSON serialization
-python3 migrate.py --generate-entities dart
+migracraft --generate-entities dart
 
 # Generate Java POJOs with getters/setters
-python3 migrate.py --generate-entities java
+migracraft --generate-entities java
 
 # Generate C++ classes with getters/setters
-python3 migrate.py --generate-entities cpp
+migracraft --generate-entities cpp
 
 # Generate C# classes with properties
-python3 migrate.py --generate-entities csharp
+migracraft --generate-entities csharp
 
 # Generate Go structs with JSON tags
-python3 migrate.py --generate-entities go
+migracraft --generate-entities go
 
 # Specify custom output directory
-python3 migrate.py --generate-entities typescript --entities-dir src/models
+migracraft --generate-entities typescript --entities-dir src/models
 ```
 
 ### Supported Languages for Entity Generation
@@ -261,6 +280,26 @@ See the `schemas/` directory for complete examples including:
 - Product catalog
 - Order processing
 - System auditing and configuration
+
+## Running MigraCraft
+
+You can run MigraCraft in two ways:
+
+1. **Using the installed command** (recommended):
+   ```bash
+   migracraft --help
+   migracraft --validate
+   migracraft --full --name "initial_setup"
+   ```
+
+2. **Using the Python script directly**:
+   ```bash
+   python migrate.py --help
+   python migrate.py --validate
+   python migrate.py --full --name "initial_setup"
+   ```
+
+Both methods provide the same functionality. The `migracraft` command is available after installing the package with `pip install -e .`
 
 ## License
 
