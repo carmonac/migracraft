@@ -1,0 +1,139 @@
+tables:
+  orders:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      user_id:
+        type: INTEGER
+        not_null: true
+      order_number:
+        type: VARCHAR(50)
+        not_null: true
+        unique: true
+      status:
+        type: VARCHAR(20)
+        not_null: true
+        default: "'pending'"
+      total_amount:
+        type: DECIMAL(12,2)
+        not_null: true
+      shipping_address:
+        type: TEXT
+        not_null: true
+      billing_address:
+        type: TEXT
+      payment_method:
+        type: VARCHAR(50)
+      payment_status:
+        type: VARCHAR(20)
+        not_null: true
+        default: "'pending'"
+      notes:
+        type: TEXT
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      updated_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      shipped_at:
+        type: TIMESTAMP
+      delivered_at:
+        type: TIMESTAMP
+    foreign_keys:
+      - columns: [user_id]
+        references_table: users
+        references_columns: [id]
+        name: fk_orders_user_id
+        on_delete: RESTRICT
+        on_update: CASCADE
+    indexes:
+      - columns: [order_number]
+        name: idx_orders_order_number
+        unique: true
+      - columns: [user_id]
+        name: idx_orders_user_id
+      - columns: [status]
+        name: idx_orders_status
+      - columns: [created_at]
+        name: idx_orders_created_at
+      - columns: [payment_status]
+        name: idx_orders_payment_status
+
+  order_items:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      order_id:
+        type: INTEGER
+        not_null: true
+      product_id:
+        type: INTEGER
+        not_null: true
+      quantity:
+        type: INTEGER
+        not_null: true
+      unit_price:
+        type: DECIMAL(10,2)
+        not_null: true
+      total_price:
+        type: DECIMAL(12,2)
+        not_null: true
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+    foreign_keys:
+      - columns: [order_id]
+        references_table: orders
+        references_columns: [id]
+        name: fk_order_items_order_id
+        on_delete: CASCADE
+        on_update: CASCADE
+      - columns: [product_id]
+        references_table: products
+        references_columns: [id]
+        name: fk_order_items_product_id
+        on_delete: RESTRICT
+        on_update: CASCADE
+    indexes:
+      - columns: [order_id]
+        name: idx_order_items_order_id
+      - columns: [product_id]
+        name: idx_order_items_product_id
+      - columns: [order_id, product_id]
+        name: idx_order_items_order_product
+        unique: true
+
+functions:
+  calculate_order_total:
+    parameters:
+      order_id: INTEGER
+    returns: DECIMAL(12,2)
+    language: sql
+    body: |
+      SELECT COALESCE(SUM(total_price), 0)
+      FROM order_items
+      WHERE order_id = $1;
+
+  get_order_summary:
+    parameters:
+      order_id: INTEGER
+    returns: "TABLE(order_number VARCHAR, customer_name VARCHAR, total_items BIGINT, total_amount DECIMAL, order_status VARCHAR)"
+    language: sql
+    body: |
+      SELECT 
+        o.order_number,
+        CONCAT(u.first_name, ' ', u.last_name) as customer_name,
+        COUNT(oi.id) as total_items,
+        o.total_amount,
+        o.status
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.id = $1
+      GROUP BY o.id, o.order_number, u.first_name, u.last_name, o.total_amount, o.status;

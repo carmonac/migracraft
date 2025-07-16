@@ -1,0 +1,134 @@
+tables:
+  categories:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      name:
+        type: VARCHAR(100)
+        not_null: true
+        unique: true
+      description:
+        type: TEXT
+      parent_id:
+        type: INTEGER
+      is_active:
+        type: BOOLEAN
+        not_null: true
+        default: true
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+    foreign_keys:
+      - columns: [parent_id]
+        references_table: categories
+        references_columns: [id]
+        name: fk_categories_parent_id
+        on_delete: SET NULL
+    indexes:
+      - columns: [name]
+        name: idx_categories_name
+      - columns: [parent_id]
+        name: idx_categories_parent_id
+
+  products:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      name:
+        type: VARCHAR(255)
+        not_null: true
+      description:
+        type: TEXT
+      sku:
+        type: VARCHAR(50)
+        not_null: true
+        unique: true
+      price:
+        type: DECIMAL(10,2)
+        not_null: true
+      cost:
+        type: DECIMAL(10,2)
+      category_id:
+        type: INTEGER
+        not_null: true
+      stock_quantity:
+        type: INTEGER
+        not_null: true
+        default: 0
+      min_stock:
+        type: INTEGER
+        not_null: true
+        default: 0
+      is_active:
+        type: BOOLEAN
+        not_null: true
+        default: true
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      updated_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      weight:
+        type: DECIMAL(8,3)
+      dimensions:
+        type: VARCHAR(100)
+    foreign_keys:
+      - columns: [category_id]
+        references_table: categories
+        references_columns: [id]
+        name: fk_products_category_id
+        on_delete: RESTRICT
+        on_update: CASCADE
+    indexes:
+      - columns: [sku]
+        name: idx_products_sku
+        unique: true
+      - columns: [category_id]
+        name: idx_products_category_id
+      - columns: [name]
+        name: idx_products_name
+      - columns: [price]
+        name: idx_products_price
+      - columns: [stock_quantity]
+        name: idx_products_stock
+
+functions:
+  calculate_profit_margin:
+    parameters:
+      product_id: INTEGER
+    returns: DECIMAL(5,2)
+    language: plpgsql
+    body: |
+      DECLARE
+        product_price DECIMAL(10,2);
+        product_cost DECIMAL(10,2);
+        margin DECIMAL(5,2);
+      BEGIN
+        SELECT price, cost
+        INTO product_price, product_cost
+        FROM products
+        WHERE id = product_id;
+        
+        IF product_cost IS NULL OR product_cost = 0 THEN
+          RETURN NULL;
+        END IF;
+        
+        margin := ((product_price - product_cost) / product_price) * 100;
+        RETURN ROUND(margin, 2);
+      END;
+
+  check_low_stock:
+    returns: "TABLE(product_id INTEGER, product_name VARCHAR, current_stock INTEGER, min_stock INTEGER)"
+    language: sql
+    body: |
+      SELECT id, name, stock_quantity, min_stock
+      FROM products
+      WHERE stock_quantity <= min_stock
+      AND is_active = true
+      ORDER BY stock_quantity ASC;

@@ -1,0 +1,144 @@
+tables:
+  audit_logs:
+    columns:
+      id:
+        type: BIGSERIAL
+        primary_key: true
+      table_name:
+        type: VARCHAR(100)
+        not_null: true
+      operation_type:
+        type: VARCHAR(10)
+        not_null: true
+      record_id:
+        type: INTEGER
+      old_values:
+        type: JSONB
+      new_values:
+        type: JSONB
+      user_id:
+        type: INTEGER
+      ip_address:
+        type: INET
+      user_agent:
+        type: TEXT
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+    indexes:
+      - columns: [table_name]
+        name: idx_audit_logs_table_name
+      - columns: [operation_type]
+        name: idx_audit_logs_operation_type
+      - columns: [record_id]
+        name: idx_audit_logs_record_id
+      - columns: [user_id]
+        name: idx_audit_logs_user_id
+      - columns: [created_at]
+        name: idx_audit_logs_created_at
+
+  system_settings:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      setting_key:
+        type: VARCHAR(100)
+        not_null: true
+        unique: true
+      setting_value:
+        type: TEXT
+      data_type:
+        type: VARCHAR(20)
+        not_null: true
+        default: "'string'"
+      description:
+        type: TEXT
+      is_public:
+        type: BOOLEAN
+        not_null: true
+        default: false
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      updated_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+    indexes:
+      - columns: [setting_key]
+        name: idx_system_settings_key
+        unique: true
+
+functions:
+  log_audit_event:
+    parameters:
+      p_table_name: VARCHAR
+      p_operation_type: VARCHAR
+      p_record_id: INTEGER
+      p_old_values: JSONB
+      p_new_values: JSONB
+      p_user_id: INTEGER
+    returns: void
+    language: plpgsql
+    body: |
+      BEGIN
+        INSERT INTO audit_logs (
+          table_name, operation_type, record_id, 
+          old_values, new_values, user_id,
+          ip_address, user_agent
+        ) VALUES (
+          p_table_name, p_operation_type, p_record_id,
+          p_old_values, p_new_values, p_user_id,
+          inet_client_addr(), current_setting('application_name', true)
+        );
+      END;
+
+  get_setting:
+    parameters:
+      setting_key: VARCHAR
+    returns: TEXT
+    language: sql
+    body: |
+      SELECT setting_value 
+      FROM system_settings 
+      WHERE setting_key = $1 
+      AND is_public = true;
+
+  set_setting:
+    parameters:
+      p_key: VARCHAR
+      p_value: TEXT
+      p_data_type: VARCHAR
+      p_description: TEXT
+    returns: void
+    language: plpgsql
+    body: |
+      BEGIN
+        INSERT INTO system_settings (setting_key, setting_value, data_type, description, updated_at)
+        VALUES (p_key, p_value, COALESCE(p_data_type, 'string'), p_description, CURRENT_TIMESTAMP)
+        ON CONFLICT (setting_key) 
+        DO UPDATE SET 
+          setting_value = EXCLUDED.setting_value,
+          data_type = EXCLUDED.data_type,
+          description = EXCLUDED.description,
+          updated_at = CURRENT_TIMESTAMP;
+      END;
+
+  cleanup_old_audit_logs:
+    parameters:
+      days_to_keep: INTEGER
+    returns: INTEGER
+    language: plpgsql
+    body: |
+      DECLARE
+        deleted_count INTEGER;
+      BEGIN
+        DELETE FROM audit_logs 
+        WHERE created_at < CURRENT_TIMESTAMP - (days_to_keep || ' days')::INTERVAL;
+        
+        GET DIAGNOSTICS deleted_count = ROW_COUNT;
+        RETURN deleted_count;
+      END;

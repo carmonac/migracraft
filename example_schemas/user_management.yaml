@@ -1,0 +1,150 @@
+tables:
+  users:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      username:
+        type: VARCHAR(50)
+        not_null: true
+        unique: true
+      email:
+        type: VARCHAR(255)
+        not_null: true
+        unique: true
+      password_hash:
+        type: VARCHAR(255)
+        not_null: true
+      first_name:
+        type: VARCHAR(100)
+      last_name:
+        type: VARCHAR(100)
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      updated_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      is_active:
+        type: BOOLEAN
+        not_null: true
+        default: true
+    indexes:
+      - columns: [username]
+        name: idx_users_username
+        unique: true
+      - columns: [email]
+        name: idx_users_email
+        unique: true
+      - columns: [created_at]
+        name: idx_users_created_at
+
+  user_profiles:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      user_id:
+        type: INTEGER
+        not_null: true
+      bio:
+        type: TEXT
+      avatar_url:
+        type: VARCHAR(500)
+      birth_date:
+        type: DATE
+      phone:
+        type: VARCHAR(20)
+      address:
+        type: TEXT
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      updated_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+    foreign_keys:
+      - columns: [user_id]
+        references_table: users
+        references_columns: [id]
+        name: fk_user_profiles_user_id
+        on_delete: CASCADE
+        on_update: CASCADE
+    indexes:
+      - columns: [user_id]
+        name: idx_user_profiles_user_id
+        unique: true
+
+  user_sessions:
+    columns:
+      id:
+        type: SERIAL
+        primary_key: true
+      user_id:
+        type: INTEGER
+        not_null: true
+      session_token:
+        type: VARCHAR(255)
+        not_null: true
+        unique: true
+      ip_address:
+        type: INET
+      user_agent:
+        type: TEXT
+      created_at:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+      expires_at:
+        type: TIMESTAMP
+        not_null: true
+      last_activity:
+        type: TIMESTAMP
+        not_null: true
+        default: CURRENT_TIMESTAMP
+    foreign_keys:
+      - columns: [user_id]
+        references_table: users
+        references_columns: [id]
+        name: fk_user_sessions_user_id
+        on_delete: CASCADE
+        on_update: CASCADE
+    indexes:
+      - columns: [session_token]
+        name: idx_user_sessions_token
+        unique: true
+      - columns: [user_id]
+        name: idx_user_sessions_user_id
+      - columns: [expires_at]
+        name: idx_user_sessions_expires_at
+
+functions:
+  get_user_full_name:
+    parameters:
+      user_id: INTEGER
+    returns: VARCHAR(201)
+    language: plpgsql
+    body: |
+      DECLARE
+        full_name VARCHAR(201);
+      BEGIN
+        SELECT CONCAT(first_name, ' ', last_name)
+        INTO full_name
+        FROM users
+        WHERE id = user_id;
+        
+        RETURN full_name;
+      END;
+
+  update_user_timestamp:
+    returns: TRIGGER
+    language: plpgsql
+    body: |
+      BEGIN
+        NEW.updated_at = CURRENT_TIMESTAMP;
+        RETURN NEW;
+      END;
