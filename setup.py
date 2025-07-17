@@ -14,16 +14,16 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 setup(
     name="migracraft",
     version="1.0.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Carlos Merchán Carmona",
+    author_email="ccarmona.87@outlook.es",
     description="Craft perfect PostgreSQL migrations from YAML schema definitions with multi-language entity generation",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/migracraft",
+    url="https://github.com/carmonac/migracraft",
     project_urls={
-        "Bug Reports": "https://github.com/yourusername/migracraft/issues",
-        "Source": "https://github.com/yourusername/migracraft",
-        "Documentation": "https://github.com/yourusername/migracraft#readme",
+        "Bug Reports": "https://github.com/carmonac/migracraft/issues",
+        "Source": "https://github.com/carmonac/migracraft",
+        "Documentation": "https://github.com/carmonac/migracraft#readme",
     },
     packages=find_packages(),
     classifiers=[
