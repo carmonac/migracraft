@@ -294,9 +294,9 @@ You can run MigraCraft in two ways:
 
 2. **Using the Python script directly**:
    ```bash
-   python migrate.py --help
-   python migrate.py --validate
-   python migrate.py --full --name "initial_setup"
+   python migracraft.py --help
+   python migracraft.py --validate
+   python migracraft.py --full --name "initial_setup"
    ```
 
 Both methods provide the same functionality. The `migracraft` command is available after installing the package with `pip install -e .`
